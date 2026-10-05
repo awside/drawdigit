@@ -5,9 +5,9 @@
 	import { activePixelCount, clearImage, debug } from './lib/drawing/state.svelte';
 
 	const brushSizes = [
-		{ label: 'Fine', radius: 1.1, dot: 6 },
-		{ label: 'Medium', radius: DEFAULT_BRUSH.radius, dot: 9 },
-		{ label: 'Bold', radius: 2.3, dot: 13 },
+		{ label: 'FINE', radius: 1.1 },
+		{ label: 'MED', radius: DEFAULT_BRUSH.radius },
+		{ label: 'BOLD', radius: 2.3 },
 	];
 
 	let radius = $state(DEFAULT_BRUSH.radius);
@@ -20,120 +20,83 @@
 	}
 </script>
 
-<div class="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-5 py-8 sm:px-8 lg:py-12">
-	<header class="mb-8 flex flex-col gap-5 sm:mb-10">
-		<div class="flex flex-wrap items-center gap-3">
-			<span
-				class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-400 shadow-lg shadow-indigo-500/30"
-			>
-				<svg viewBox="0 0 24 24" class="h-5 w-5 text-white" aria-hidden="true">
-					<g fill="currentColor">
-						<circle cx="6" cy="6" r="1.9" />
-						<circle cx="12" cy="6" r="1.9" />
-						<circle cx="18" cy="6" r="1.9" />
-						<circle cx="6" cy="12" r="1.9" />
-						<circle cx="12" cy="12" r="1.9" />
-						<circle cx="18" cy="12" r="1.9" />
-						<circle cx="6" cy="18" r="1.9" />
-						<circle cx="12" cy="18" r="1.9" />
-						<circle cx="18" cy="18" r="1.9" />
-					</g>
-				</svg>
-			</span>
-			<span
-				class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-300"
-			>
-				<span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span>
-				Drawing milestone · model not wired up yet
-			</span>
+<div class="min-h-svh p-3 sm:p-5 lg:p-8">
+	<div class="mx-auto flex max-w-5xl flex-col border border-moss bg-void/80 shadow-[0_0_60px_-20px_rgba(84,209,138,0.35)]">
+		<!-- Terminal title bar -->
+		<div class="flex items-center gap-2 border-b border-moss bg-crust px-3 py-2">
+			<span class="h-2.5 w-2.5 rounded-full bg-ember/90"></span>
+			<span class="h-2.5 w-2.5 rounded-full bg-sand/80"></span>
+			<span class="h-2.5 w-2.5 rounded-full bg-leaf/80"></span>
+			<span class="ml-3 truncate text-xs text-fern">andy@vanderbilt: ~/digit-recognition</span>
 		</div>
 
-		<div>
-			<h1 class="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-				Handwritten
-				<span class="bg-gradient-to-r from-indigo-300 via-violet-200 to-cyan-200 bg-clip-text text-transparent">
-					Digit Recognition
-				</span>
-			</h1>
-			<p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-				Draw a digit (0–9) on the 28×28 grid below. Hold the pointer down and move slowly, or
-				repeatedly, to make strokes brighter — the pixels are a real grayscale image.
-			</p>
-		</div>
-	</header>
-
-	<div class="grid flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
-		<section
-			class="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-4 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] backdrop-blur-xl sm:p-6"
-		>
-			<PixelGrid {radius} />
-
-			<div class="flex items-center justify-between px-1 text-xs text-slate-500">
-				<span class="font-mono">28 × 28 · 784 logical pixels</span>
-				<span class="inline-flex items-center gap-1.5">
-					<span
-						class="h-1.5 w-1.5 rounded-full transition-colors"
-						class:bg-cyan-400={active > 0}
-						class:bg-slate-600={active === 0}
-					></span>
-					<span class="font-mono">{active} active</span>
-				</span>
-			</div>
-		</section>
-
-		<aside class="flex flex-col gap-4">
-			<button
-				type="button"
-				class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 px-4 py-3 font-medium text-white shadow-lg shadow-indigo-900/40 transition hover:from-indigo-400 hover:to-violet-500 hover:shadow-indigo-800/50 focus-visible:ring-2 focus-visible:ring-indigo-300/70 focus-visible:outline-none active:scale-[0.99]"
-				onclick={handleClear}
-			>
-				<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" aria-hidden="true">
-					<path
-						d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"
-						stroke="currentColor"
-						stroke-width="1.7"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					/>
-				</svg>
-				Clear canvas
-			</button>
-
-			<div class="rounded-2xl border border-white/10 bg-white/[0.03] p-3 backdrop-blur-xl">
-				<p class="mb-2 px-1 text-[11px] font-semibold tracking-wider text-slate-500 uppercase">
-					Brush size
-				</p>
-				<div class="flex gap-1 rounded-xl bg-ink-950/50 p-1">
-					{#each brushSizes as size (size.label)}
-						<label
-							class="flex flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition {radius ===
-							size.radius
-								? 'bg-indigo-500/90 text-white shadow-sm shadow-indigo-900/50'
-								: 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}"
-						>
-							<input
-								type="radio"
-								name="brush"
-								value={size.radius}
-								bind:group={radius}
-								class="sr-only"
-							/>
-							<span
-								class="rounded-full bg-current"
-								style={`width:${size.dot}px;height:${size.dot}px`}
-							></span>
-							{size.label}
-						</label>
-					{/each}
+		<div class="flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
+			<header class="flex flex-col gap-2">
+				<div class="flex flex-wrap items-center gap-2 text-[11px] tracking-wider">
+					<span class="border border-leaf/50 px-1.5 py-0.5 text-leaf">MILESTONE_1</span>
+					<span class="text-fern">// drawing surface · model not wired up yet</span>
 				</div>
+				<h1 class="text-lg font-bold tracking-[0.18em] text-phos sm:text-xl">
+					HANDWRITTEN&nbsp;DIGIT&nbsp;RECOGNITION<span class="cursor-blink" aria-hidden="true"></span>
+				</h1>
+				<p class="max-w-2xl text-xs leading-relaxed text-fern sm:text-sm">
+					<span class="text-leaf">#</span> draw a digit 0–9 on the 28×28 grid. hold the pointer down
+					and move slowly, or repeatedly, to brighten the pixels.
+				</p>
+			</header>
+
+			<div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-8">
+				<section class="flex flex-col gap-3">
+					<PixelGrid {radius} />
+
+					<div class="flex items-center justify-between text-[11px] text-fern">
+						<span>28x28 · 784 logical px</span>
+						<span class="flex items-center gap-2">
+							<span
+								class="inline-block h-2 w-2"
+								class:bg-aqua={active > 0}
+								class:bg-moss={active === 0}
+							></span>
+							<span>active_px = {active}</span>
+						</span>
+					</div>
+				</section>
+
+				<aside class="flex flex-col gap-4 text-xs">
+					<button
+						type="button"
+						class="border border-ember/70 px-3 py-2.5 font-bold tracking-wider text-ember transition hover:bg-ember/15 hover:text-sand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-aqua"
+						onclick={handleClear}
+					>
+						[ CLEAR CANVAS ]
+					</button>
+
+					<div class="border border-moss bg-crust/60 p-3">
+						<p class="mb-2 text-[10px] tracking-wider text-fern"># brush_size</p>
+						<div class="flex gap-1">
+							{#each brushSizes as size (size.label)}
+								<button
+									type="button"
+									class="flex-1 border px-1 py-1.5 text-[11px] tracking-wider transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-aqua {radius ===
+									size.radius
+										? 'border-ember bg-ember/10 text-sand'
+										: 'border-moss text-fern hover:border-leaf/60 hover:text-leaf'}"
+									onclick={() => (radius = size.radius)}
+								>
+									{size.label}
+								</button>
+							{/each}
+						</div>
+					</div>
+
+					<DebugPanel />
+
+					<p class="text-[11px] leading-relaxed text-fern/80">
+						<span class="text-leaf">#</span> this image will later be sent to a python
+						deep-learning model. no predictions are generated yet.
+					</p>
+				</aside>
 			</div>
-
-			<DebugPanel />
-
-			<p class="px-1 text-xs leading-relaxed text-slate-500">
-				This image will later be sent to a Python deep-learning model. No predictions are
-				generated yet.
-			</p>
-		</aside>
+		</div>
 	</div>
 </div>
