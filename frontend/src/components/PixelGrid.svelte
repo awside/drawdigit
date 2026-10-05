@@ -19,8 +19,9 @@
 
 	// Visual palette. Painted intensity is grayscale (like MNIST); the hover
 	// preview uses a distinct accent tint so feedback is clearly separate.
-	const BACKGROUND = { r: 15, g: 18, b: 27 };
-	const ACCENT = { r: 56, g: 189, b: 248 };
+	const BACKGROUND = { r: 10, g: 15, b: 30 };
+	const PAINT = { r: 248, g: 250, b: 252 };
+	const ACCENT = { r: 34, g: 211, b: 238 };
 	const HOVER_ALPHA = 0.55;
 
 	/**
@@ -155,9 +156,9 @@
 		let b = BACKGROUND.b;
 
 		if (painted > 0) {
-			r += (255 - r) * painted;
-			g += (255 - g) * painted;
-			b += (255 - b) * painted;
+			r += (PAINT.r - r) * painted;
+			g += (PAINT.g - g) * painted;
+			b += (PAINT.b - b) * painted;
 		}
 
 		if (hover > 0) {
@@ -197,11 +198,12 @@
 		margin: 0 auto;
 		gap: 1px;
 		padding: 1px;
-		background: #0a0a0a;
-		border-radius: 12px;
+		background: #1b2540;
+		border-radius: 16px;
 		box-shadow:
-			0 20px 40px -12px rgba(0, 0, 0, 0.6),
-			0 0 0 1px rgba(255, 255, 255, 0.06);
+			0 0 0 1px rgba(255, 255, 255, 0.06),
+			inset 0 1px 0 rgba(255, 255, 255, 0.04),
+			0 30px 60px -25px rgba(0, 0, 0, 0.9);
 		cursor: crosshair;
 		touch-action: none;
 		user-select: none;
@@ -209,6 +211,6 @@
 	}
 
 	.pixel {
-		border-radius: 1px;
+		border-radius: 2px;
 	}
 </style>
