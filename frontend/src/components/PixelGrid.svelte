@@ -14,12 +14,12 @@
 	const flow = DEFAULT_BRUSH.flow;
 	const spacing = DEFAULT_BRUSH.spacing;
 
-	/** Stable, keyed list of cell indices so the DOM order never changes. */
-	const cells = Array.from({ length: PIXEL_COUNT }, (_, index) => index);
-
-	// Phosphor palette. Painted intensity is light green; the transient hover
-	// preview uses a light blue tint. Cells start near-black so the brighter
-	// green gutters read as clear grid lines.
+	/*
+		The grid is rendered to a canvas at integer device-pixel coordinates.
+		CSS grid gaps are laid out at fractional sizes, so some 1px lines round
+		down to zero and disappear; drawing to a canvas keeps every line uniform.
+	*/
+	const LINE = '#3f7a58';
 	const BACKGROUND = { r: 8, g: 18, b: 12 };
 	const PAINT = { r: 142, g: 240, b: 182 };
 	const ACCENT = { r: 127, g: 214, b: 255 };
@@ -32,7 +32,14 @@
 	let glow: number[] = $state(new Array<number>(PIXEL_COUNT).fill(0));
 	let glowing: number[] = [];
 
-	let gridEl: HTMLDivElement | undefined;
+	let wrapEl: HTMLDivElement | undefined;
+	let canvasEl: HTMLCanvasElement | undefined;
+	/** Content-box width of the wrapper, tracked so the canvas can stay crisp. */
+	let cssWidth = $state(0);
+
+	// Backing-store bookkeeping so we only resize the canvas when needed.
+	let lastBacking = 0;
+	let lastDpr = 0;
 
 	// High-frequency drawing state is kept local to this component.
 	let drawing = false;
@@ -49,8 +56,9 @@
 
 	/** Map a pointer event to fractional logical coordinates (0..GRID_SIZE). */
 	function toLogical(event: PointerEvent): Point {
-		if (!gridEl) return { x: 0, y: 0 };
-		const rect = gridEl.getBoundingClientRect();
+		const element = canvasEl ?? wrapEl;
+		if (!element) return { x: 0, y: 0 };
+		const rect = element.getBoundingClientRect();
 		return {
 			x: ((event.clientX - rect.left) / rect.width) * GRID_SIZE,
 			y: ((event.clientY - rect.top) / rect.height) * GRID_SIZE,
@@ -106,11 +114,11 @@
 	}
 
 	function onPointerDown(event: PointerEvent): void {
-		if (event.button !== 0 || !gridEl) return;
+		if (event.button !== 0 || !wrapEl) return;
 		event.preventDefault();
 
 		try {
-			gridEl.setPointerCapture(event.pointerId);
+			wrapEl.setPointerCapture(event.pointerId);
 		} catch {
 			// Pointer capture is best-effort; drawing still works without it.
 		}
@@ -135,8 +143,8 @@
 		if (!drawing) return;
 		drawing = false;
 		cancelAnimationFrame(frame);
-		if (gridEl?.hasPointerCapture(event.pointerId)) {
-			gridEl.releasePointerCapture(event.pointerId);
+		if (wrapEl?.hasPointerCapture(event.pointerId)) {
+			wrapEl.releasePointerCapture(event.pointerId);
 		}
 	}
 
@@ -146,7 +154,7 @@
 
 	/**
 	 * Compose the displayed colour for a cell from its painted intensity
-	 * (grayscale) and its transient hover glow (accent tint).
+	 * (phosphor green) and its transient hover glow (light blue tint).
 	 */
 	function cellColor(index: number): string {
 		const painted = image.pixels[index];
@@ -171,12 +179,67 @@
 
 		return `rgb(${r | 0}, ${g | 0}, ${b | 0})`;
 	}
+
+	/**
+	 * Render the 28x28 image plus grid lines to the canvas. All coordinates are
+	 * integers in the canvas backing store, so lines are exactly uniform.
+	 */
+	function draw(): void {
+		const canvas = canvasEl;
+		if (!canvas) return;
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return;
+
+		const dpr = window.devicePixelRatio || 1;
+		const target = Math.round(cssWidth * dpr);
+		const gap = Math.max(1, Math.round(dpr));
+		let cell = Math.floor((target - (GRID_SIZE - 1) * gap) / GRID_SIZE);
+		if (cell < 1) cell = 1;
+		const backing = cell * GRID_SIZE + (GRID_SIZE - 1) * gap;
+
+		if (backing !== lastBacking || dpr !== lastDpr) {
+			canvas.width = backing;
+			canvas.height = backing;
+			canvas.style.width = `${backing / dpr}px`;
+			canvas.style.height = `${backing / dpr}px`;
+			lastBacking = backing;
+			lastDpr = dpr;
+		}
+
+		// Grid lines show through the gutters between cells.
+		ctx.fillStyle = LINE;
+		ctx.fillRect(0, 0, backing, backing);
+
+		const stride = cell + gap;
+		for (let row = 0; row < GRID_SIZE; row++) {
+			const y = row * stride;
+			for (let col = 0; col < GRID_SIZE; col++) {
+				ctx.fillStyle = cellColor(row * GRID_SIZE + col);
+				ctx.fillRect(col * stride, y, cell, cell);
+			}
+		}
+	}
+
+	// Track the wrapper's width so the canvas matches it while staying crisp.
+	$effect(() => {
+		if (!wrapEl) return;
+		const observer = new ResizeObserver((entries) => {
+			cssWidth = entries[0].contentRect.width;
+		});
+		observer.observe(wrapEl);
+		return () => observer.disconnect();
+	});
+
+	// Redraw whenever the drawing data, hover glow, or size changes.
+	$effect(() => {
+		if (!canvasEl || cssWidth <= 0) return;
+		draw();
+	});
 </script>
 
 <div
-	bind:this={gridEl}
+	bind:this={wrapEl}
 	class="pixel-grid"
-	style={`grid-template-columns: repeat(${GRID_SIZE}, 1fr)`}
 	role="application"
 	aria-label={`${GRID_SIZE} by ${GRID_SIZE} pixel drawing grid`}
 	onpointerdown={onPointerDown}
@@ -185,25 +248,22 @@
 	onpointercancel={endStroke}
 	onpointerleave={onPointerLeave}
 >
-	{#each cells as index (index)}
-		<div class="pixel" style={`background: ${cellColor(index)}`}></div>
-	{/each}
+	<canvas class="grid-canvas" bind:this={canvasEl}></canvas>
 </div>
 
 <style>
 	.pixel-grid {
-		display: grid;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		width: 100%;
 		/* Cap by width and by viewport height so the square always fits. */
 		max-width: min(32rem, 58vh);
 		aspect-ratio: 1 / 1;
 		margin: 0 auto;
-		/* Dark canvas with visible green grid lines. */
-		gap: 1px;
-		padding: 1px;
+		/* Dark canvas with visible green grid lines (drawn by the canvas). */
 		background: #3f7a58;
 		border: 1px solid #3f7a58;
-		border-radius: 0;
 		box-shadow:
 			0 0 0 1px #050906,
 			0 0 30px -10px rgba(84, 209, 138, 0.4);
@@ -213,7 +273,10 @@
 		-webkit-user-select: none;
 	}
 
-	.pixel {
-		border-radius: 0;
+	.grid-canvas {
+		display: block;
+		max-width: 100%;
+		max-height: 100%;
+		image-rendering: pixelated;
 	}
 </style>
