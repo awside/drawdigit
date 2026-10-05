@@ -18,8 +18,9 @@
 	const cells = Array.from({ length: PIXEL_COUNT }, (_, index) => index);
 
 	// Phosphor palette. Painted intensity is light green; the transient hover
-	// preview uses a light blue tint so feedback is clearly separate from paint.
-	const BACKGROUND = { r: 8, g: 18, b: 12 };
+	// preview uses a light blue tint. Unpainted cells are a visible dim green so
+	// the near-black gutters between them always read as grid lines.
+	const BACKGROUND = { r: 17, g: 44, b: 30 };
 	const PAINT = { r: 142, g: 240, b: 182 };
 	const ACCENT = { r: 127, g: 214, b: 255 };
 	const HOVER_ALPHA = 0.5;
@@ -197,15 +198,15 @@
 		max-width: min(32rem, 58vh);
 		aspect-ratio: 1 / 1;
 		margin: 0 auto;
-		gap: 1px;
-		padding: 1px;
-		background: #21452f;
+		/* Near-black gutters between visible dim-green cells: clear grid lines. */
+		gap: 2px;
+		padding: 2px;
+		background: #030604;
 		border: 1px solid #2f6b47;
 		border-radius: 0;
 		box-shadow:
 			0 0 0 1px #050906,
-			0 0 26px -8px rgba(84, 209, 138, 0.55),
-			inset 0 0 40px -22px rgba(84, 209, 138, 0.5);
+			0 0 30px -10px rgba(84, 209, 138, 0.4);
 		cursor: crosshair;
 		touch-action: none;
 		user-select: none;
