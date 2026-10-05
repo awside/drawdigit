@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Build output
+frontend/dist/
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.local
+
+# Environment / secrets
+.env
+.env.*
+
+# Python (future backend)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Jupyter (future notebooks)
+.ipynb_checkpoints/
+
+# Data & model artifacts (future)
+data/
+*.pt
+*.pth
+*.pkl
+*.joblib
+*.onnx
