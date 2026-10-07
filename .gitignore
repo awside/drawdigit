@@ -39,3 +39,8 @@ data/
 *.pkl
 *.joblib
 *.onnx
+
+# Shipped model artifacts (committed on purpose)
+# Inference runs in the browser, so the exported ONNX weights must be served
+# as a static asset. Keep them out of the ignore rules above.
+!frontend/public/models/*.onnx

@@ -1,6 +1,7 @@
 # frontend
 
-Svelte 5 + Vite + TypeScript + Tailwind CSS v4 frontend for the Digit Recognition project.
+Svelte 5 + Vite + TypeScript + Tailwind CSS v4 frontend for **DrawDigit** (interactive handwritten
+digit recognition). Model inference runs in the browser via ONNX Runtime Web.
 
 ```bash
 bun install

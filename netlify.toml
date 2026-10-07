@@ -1,0 +1,12 @@
+# Netlify static deployment for DrawDigit.
+#
+# Builds the Svelte/Vite app in frontend/ with Bun and publishes the static bundle.
+# The trained ONNX model is served from frontend/public/models (committed on purpose).
+
+[build]
+  base = "frontend"
+  command = "bun run build"
+  publish = "dist"
+
+[build.environment]
+  BUN_VERSION = "1.4.2"
