@@ -26,9 +26,10 @@ The full requirement/grading rubric lives in [`FINAL_PROJECT_INSTRUCTIONS.md`](.
   in the frontend with `onnxruntime-web`.
 
 Explicitly **not** built yet, by design: MNIST loading, CNN training, ONNX export, the
-`onnxruntime-web` runtime, MNIST-style input preprocessing in JS, prediction UI, and Netlify
-deployment. Do not add these until the current milestone is reviewed and the next phase is
-requested.
+`onnxruntime-web` runtime, MNIST-style input preprocessing in JS, and the prediction UI. Do not add
+these until the current milestone is reviewed and the next phase is requested.
+
+The static frontend is already deployed to Netlify (see *Deployment* below).
 
 ## Key architectural decision: client-side inference
 
@@ -130,6 +131,14 @@ freehand canvas — the pixelation is intentional and matches MNIST.
 - **Training / export:** Python + PyTorch (in `training/`), exporting to ONNX.
 - **Runtime inference:** `onnxruntime-web` (WASM, with WebGPU where available).
 - **Deployment:** Netlify static hosting built from `frontend/`.
+
+## Deployment
+
+- **Live URL:** https://drawdigit0.netlify.app/ (Netlify site `drawdigit0`).
+- Configured by `netlify.toml` at the repo root: base `frontend`, `bun run build`, publish `dist`,
+  `BUN_VERSION` pinned.
+- Netlify builds from the GitHub repo (`awside/drawdigit`); **pushing to `main` auto-deploys.**
+- The app is public GitHub + public static hosting; keep any secrets out of the repo.
 
 ## Commands
 

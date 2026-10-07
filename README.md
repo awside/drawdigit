@@ -6,6 +6,8 @@ A user draws a digit (0–9) on a **28×28 pixel** surface in the browser. A con
 network trained on **MNIST** predicts the digit, and inference runs **entirely in the browser** via
 ONNX Runtime Web — no inference server.
 
+**Live app:** https://drawdigit0.netlify.app/ *(drawing surface only; model inference not wired in yet)*
+
 > **Project requirements:** [`FINAL_PROJECT_INSTRUCTIONS.md`](./FINAL_PROJECT_INSTRUCTIONS.md)
 > **Repo orientation:** [`AGENTS.md`](./AGENTS.md)
 > **Current milestone:** interactive drawing surface. **Model inference is not wired in yet.**
@@ -19,7 +21,7 @@ ONNX Runtime Web — no inference server.
 | Clear/reset + debug readouts | ✅ |
 | MNIST CNN training + ONNX export (`training/`) | ⬜ next milestone |
 | In-browser inference (`onnxruntime-web`) + prediction UI | ⬜ next milestone |
-| Netlify deployment | ⬜ next milestone |
+| Netlify deployment | ✅ live at https://drawdigit0.netlify.app/ (infra only; model not wired in yet) |
 
 ## Requirements
 
